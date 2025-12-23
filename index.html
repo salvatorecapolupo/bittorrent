@@ -38,6 +38,63 @@
   <button onclick="resetSimulation()">🔄 Reset</button>
 </div>
 
+<div style="max-width:800px;margin:20px auto;text-align:left;font-size:15px;">
+  <h3>Come interpretare la simulazione</h3>
+
+  <ul>
+    <li>
+      <strong>Percentuale (%) dentro ogni peer</strong><br>
+      Indica quanta parte del file è stata scaricata da quel computer.<br>
+      <em>Esempio:</em> 50% significa che il peer possiede metà dei pezzi del file.
+    </li>
+
+    <li>
+      <strong>Peer</strong><br>
+      Ogni cerchio rappresenta un computer collegato alla rete BitTorrent.
+      Un peer può <strong>scaricare e caricare</strong> contemporaneamente.
+    </li>
+
+    <li>
+      <strong>Seed (cerchio verde)</strong><br>
+      È un peer che possiede il <strong>100% del file</strong>.
+      Serve per diffondere inizialmente tutti i pezzi.
+    </li>
+
+    <li>
+      <strong>Leecher (cerchio giallo)</strong><br>
+      È un peer che non ha ancora il file completo,
+      ma <strong>condivide comunque</strong> i pezzi già scaricati.
+    </li>
+
+    <li>
+      <strong>Chunk (pezzo di file)</strong><br>
+      Il file viene diviso in piccoli pezzi.
+      Ogni peer scarica chunk diversi da peer diversi.
+    </li>
+
+    <li>
+      <strong>Linee blu tra i peer</strong><br>
+      Rappresentano lo <strong>scambio di chunk</strong> tra due computer.
+    </li>
+
+    <li>
+      <strong>Swarm</strong><br>
+      È l’insieme di tutti i peer che stanno condividendo lo stesso file.
+    </li>
+
+    <li>
+      <strong>Perché il download accelera?</strong><br>
+      Più peer entrano nello swarm, più fonti di download sono disponibili.
+    </li>
+
+    <li>
+      <strong>Perché BitTorrent è affidabile?</strong><br>
+      Se un peer si disconnette, gli altri continuano lo scambio senza problemi.
+    </li>
+  </ul>
+</div>
+
+  
 <script>
 /* -----------------------------
    PARAMETRI DIDATTICI
