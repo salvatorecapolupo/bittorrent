@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulazione BitTorrent - Sistemi e Reti</title>
+
+  <!-- Libreria p5.js -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
+    #controls {
+      padding: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Simulazione BitTorrent (P2P)</h2>
+<p>Ogni peer scarica e carica pezzi del file</p>
+
+<div id="controls">
+  <button onclick="addPeer()">➕ Aggiungi Peer</button>
+  <button onclick="removePeer()">➖ Rimuovi Peer</button>
+  <button onclick="resetSimulation()">🔄 Reset</button>
+</div>
+
+<script>
+/* -----------------------------
+   PARAMETRI DIDATTICI
+------------------------------ */
+const TOTAL_CHUNKS = 6;
+let peers = [];
+
+/* -----------------------------
+   CLASSE PEER
+------------------------------ */
+class Peer {
+  constructor(x, y, chunks = []) {
+    this.x = x;
+    this.y = y;
+    this.chunks = chunks;
+    this.radius = 30;
+  }
+
+  isSeed() {
+    return this.chunks.length === TOTAL_CHUNKS;
+  }
+
+  draw() {
+    // Colore peer
+    if (this.isSeed()) fill(0, 200, 0);
+    else fill(200, 200, 0);
+
+    ellipse(this.x, this.y, this.radius * 2);
+
+    // Testo percentuale
+    fill(0);
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    text(
+      Math.floor((this.chunks.length / TOTAL_CHUNKS) * 100) + "%",
+      this.x,
+      this.y
+    );
+  }
+
+  sendChunk(other) {
+    let available = this.chunks.filter(
+      c => !other.chunks.includes(c)
+    );
+    if (available.length > 0) {
+      let chunk = random(available);
+      other.chunks.push(chunk);
+
+      // Linea animata
+      stroke(0, 150, 255);
+      line(this.x, this.y, other.x, other.y);
+    }
+  }
+}
+
+/* -----------------------------
+   SETUP
+------------------------------ */
+function setup() {
+  createCanvas(800, 500);
+  resetSimulation();
+}
+
+/* -----------------------------
+   LOOP
+------------------------------ */
+function draw() {
+  background(20);
+
+  // Titolo
+  noStroke();
+  fill(255);
+  textSize(16);
+  textAlign(CENTER);
+  text("Swarm BitTorrent", width / 2, 25);
+
+  // Disegna peer
+  for (let p of peers) {
+    p.draw();
+  }
+
+  // Scambio chunk
+  for (let i = 0; i < peers.length; i++) {
+    for (let j = 0; j < peers.length; j++) {
+      if (i !== j && random() < 0.01) {
+        peers[i].sendChunk(peers[j]);
+      }
+    }
+  }
+}
+
+/* -----------------------------
+   FUNZIONI INTERATTIVE
+------------------------------ */
+function addPeer() {
+  let angle = random(TWO_PI);
+  let r = 180;
+  let x = width / 2 + cos(angle) * r;
+  let y = height / 2 + sin(angle) * r;
+
+  peers.push(new Peer(x, y, []));
+}
+
+function removePeer() {
+  if (peers.length > 1) peers.pop();
+}
+
+function resetSimulation() {
+  peers = [];
+
+  // Seed iniziale (file completo)
+  let seed = new Peer(width / 2, height / 2, []);
+  for (let i = 0; i < TOTAL_CHUNKS; i++) {
+    seed.chunks.push(i);
+  }
+  peers.push(seed);
+
+  // Leecher iniziali
+  for (let i = 0; i < 4; i++) {
+    addPeer();
+  }
+}
+</script>
+
+</body>
+</html>
