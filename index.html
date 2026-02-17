@@ -4,97 +4,98 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Simulazione BitTorrent</title>
+<title>Simulazione Protocollo BitTorrent</title>
 
 <style>
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f172a, #020617);
+    font-family: Arial, sans-serif;
+    background: #0f172a;
     color: white;
 }
 
-/* HEADER */
 header {
     text-align: center;
-    padding: 40px 20px;
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-header p {
-    opacity: 0.7;
-}
-
-/* CARD */
-.container {
-    max-width: 1100px;
-    margin: auto;
     padding: 20px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 15px;
 }
 
 .card {
     background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    margin-bottom: 40px;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
 }
 
-/* SVG GRAPH */
+/* SVG */
 svg {
     width: 100%;
-    height: 500px;
+    height: 420px;
+}
+
+/* LINKS */
+.link {
+    stroke: #64748b;
+    stroke-width: 2;
+    opacity: 0.6;
 }
 
 /* NODES */
-.node {
-    fill: #38bdf8;
-    stroke: #0ea5e9;
+.node circle {
     stroke-width: 2;
     cursor: pointer;
-    transition: 0.3s;
 }
 
-.node:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 10px #38bdf8);
-}
-
-/* SEED COLOR */
-.seed {
+.seed circle {
     fill: #22c55e;
     stroke: #16a34a;
 }
 
-/* TRACKER */
-.tracker {
+.peer circle {
+    fill: #38bdf8;
+    stroke: #0284c7;
+}
+
+.leecher circle {
     fill: #f59e0b;
     stroke: #d97706;
 }
 
-/* LINES */
-.link {
-    stroke: #64748b;
-    stroke-width: 2;
-    stroke-dasharray: 6;
-    animation: dash 3s linear infinite;
+text {
+    font-size: 11px;
+    text-anchor: middle;
+    fill: white;
 }
 
-@keyframes dash {
-    to {
-        stroke-dashoffset: -12;
-    }
-}
-
-/* EXPLANATION */
 .explanation {
-    line-height: 1.7;
-    font-size: 1.05rem;
+    line-height: 1.6;
     opacity: 0.9;
 }
 </style>
@@ -104,68 +105,171 @@ svg {
 
 <header>
     <h1>Simulazione Rete BitTorrent</h1>
-    <p>Visualizzazione dinamica della distribuzione peer-to-peer</p>
 </header>
 
 <div class="container">
 
-    <!-- GRAFICO SOPRA -->
-    <div class="card">
-
-        <svg viewBox="0 0 800 500">
-
-            <!-- CONNECTIONS -->
-            <line class="link" x1="400" y1="80" x2="200" y2="250"/>
-            <line class="link" x1="400" y1="80" x2="600" y2="250"/>
-            <line class="link" x1="200" y1="250" x2="600" y2="250"/>
-            <line class="link" x1="200" y1="250" x2="120" y2="400"/>
-            <line class="link" x1="600" y1="250" x2="680" y2="400"/>
-            <line class="link" x1="400" y1="80" x2="400" y2="420"/>
-
-            <!-- TRACKER -->
-            <circle cx="400" cy="80" r="30" class="node tracker"/>
-            <text x="400" y="85" text-anchor="middle" fill="white">Tracker</text>
-
-            <!-- SEED -->
-            <circle cx="400" cy="420" r="30" class="node seed"/>
-            <text x="400" y="425" text-anchor="middle" fill="white">Seed</text>
-
-            <!-- PEERS -->
-            <circle cx="200" cy="250" r="25" class="node"/>
-            <text x="200" y="255" text-anchor="middle" fill="white">Peer</text>
-
-            <circle cx="600" cy="250" r="25" class="node"/>
-            <text x="600" y="255" text-anchor="middle" fill="white">Peer</text>
-
-            <circle cx="120" cy="400" r="22" class="node"/>
-            <text x="120" y="405" text-anchor="middle" fill="white">Peer</text>
-
-            <circle cx="680" cy="400" r="22" class="node"/>
-            <text x="680" y="405" text-anchor="middle" fill="white">Peer</text>
-
-        </svg>
-
+    <!-- CONTROLLI -->
+    <div class="controls">
+        <button onclick="addNode()">Aggiungi Nodo</button>
+        <button onclick="removeNode()">Rimuovi Nodo</button>
+        <button onclick="randomNetwork()">Crea Rete Casuale</button>
     </div>
 
+    <!-- GRAFICO -->
+    <div class="card">
+        <svg id="network"></svg>
+    </div>
 
-    <!-- SPIEGAZIONE SOTTO -->
+    <!-- SPIEGAZIONE -->
     <div class="card explanation">
-
         <h2>Come funziona BitTorrent</h2>
-
         <p>
-        Inserisci qui lo spiegone originale della tua pagina.
-        Puoi mantenere il testo identico oppure migliorarlo.
+        In BitTorrent i file vengono divisi in piccoli pezzi distribuiti tra gli utenti.
+        Chi possiede il file completo è chiamato <b>seed</b>.
+        Chi sta scaricando è un <b>leecher</b>.
+        Quando un nodo completa il download diventa anch’esso seed.
         </p>
-
         <p>
-        L’idea principale è che i file vengono suddivisi in piccoli pezzi e distribuiti tra più utenti,
-        riducendo il carico sul server centrale e aumentando la velocità complessiva.
+        I peer si scambiano parti del file tra loro, aumentando la velocità e riducendo il carico
+        su un server centrale.
         </p>
-
     </div>
 
 </div>
+
+<script>
+const svg = document.getElementById("network");
+
+let nodes = [];
+let links = [];
+
+const WIDTH = 800;
+const HEIGHT = 420;
+
+function createNode(x, y, progress = 0) {
+    return {
+        x,
+        y,
+        progress,
+        id: Date.now() + Math.random()
+    };
+}
+
+function addNode() {
+    nodes.push(createNode(
+        Math.random() * WIDTH,
+        Math.random() * HEIGHT,
+        Math.random() * 30
+    ));
+    draw();
+}
+
+function removeNode() {
+    nodes.pop();
+    draw();
+}
+
+function randomNetwork() {
+    nodes = [];
+    let count = 5 + Math.floor(Math.random() * 6);
+
+    for (let i = 0; i < count; i++) {
+        nodes.push(createNode(
+            Math.random() * WIDTH,
+            Math.random() * HEIGHT,
+            i === 0 ? 100 : Math.random() * 40
+        ));
+    }
+
+    draw();
+}
+
+function getType(node) {
+    if (node.progress >= 100) return "seed";
+    if (node.progress > 0) return "peer";
+    return "leecher";
+}
+
+function simulate() {
+
+    let seeds = nodes.filter(n => n.progress >= 100);
+
+    nodes.forEach(n => {
+        if (n.progress < 100 && seeds.length > 0) {
+            n.progress += Math.random() * 2;
+            if (n.progress > 100) n.progress = 100;
+        }
+    });
+
+    draw();
+}
+
+function draw() {
+
+    svg.innerHTML = "";
+
+    // Links (semplici)
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+
+            if (Math.random() < 0.2) {
+
+                let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+                line.setAttribute("x1", nodes[i].x);
+                line.setAttribute("y1", nodes[i].y);
+                line.setAttribute("x2", nodes[j].x);
+                line.setAttribute("y2", nodes[j].y);
+                line.setAttribute("class", "link");
+
+                svg.appendChild(line);
+            }
+        }
+    }
+
+    nodes.forEach(node => {
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        let type = getType(node);
+        g.setAttribute("class", "node " + type);
+
+        let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        circle.setAttribute("cx", node.x);
+        circle.setAttribute("cy", node.y);
+        circle.setAttribute("r", 22);
+
+        let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+        label.setAttribute("x", node.x);
+        label.setAttribute("y", node.y - 30);
+
+        label.textContent = type.toUpperCase();
+
+        let percent = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+        percent.setAttribute("x", node.x);
+        percent.setAttribute("y", node.y + 4);
+
+        percent.textContent = Math.floor(node.progress) + "%";
+
+        g.appendChild(circle);
+        g.appendChild(label);
+        g.appendChild(percent);
+
+        svg.appendChild(g);
+    });
+}
+
+// simulazione continua
+setInterval(simulate, 800);
+
+// start iniziale
+randomNetwork();
+
+</script>
 
 </body>
 </html>
