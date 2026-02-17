@@ -1,223 +1,171 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Simulazione BitTorrent - Sistemi e Reti</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Libreria p5.js -->
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+<title>Simulazione BitTorrent</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      text-align: center;
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: white;
+}
+
+/* HEADER */
+header {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+header p {
+    opacity: 0.7;
+}
+
+/* CARD */
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    margin-bottom: 40px;
+}
+
+/* SVG GRAPH */
+svg {
+    width: 100%;
+    height: 500px;
+}
+
+/* NODES */
+.node {
+    fill: #38bdf8;
+    stroke: #0ea5e9;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.node:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px #38bdf8);
+}
+
+/* SEED COLOR */
+.seed {
+    fill: #22c55e;
+    stroke: #16a34a;
+}
+
+/* TRACKER */
+.tracker {
+    fill: #f59e0b;
+    stroke: #d97706;
+}
+
+/* LINES */
+.link {
+    stroke: #64748b;
+    stroke-width: 2;
+    stroke-dasharray: 6;
+    animation: dash 3s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -12;
     }
-    #controls {
-      padding: 10px;
-    }
-    button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-  </style>
+}
+
+/* EXPLANATION */
+.explanation {
+    line-height: 1.7;
+    font-size: 1.05rem;
+    opacity: 0.9;
+}
+</style>
 </head>
 
 <body>
 
-<h2>Simulazione BitTorrent (P2P)</h2>
-<p>Ogni peer scarica e carica pezzi del file</p>
+<header>
+    <h1>Simulazione Rete BitTorrent</h1>
+    <p>Visualizzazione dinamica della distribuzione peer-to-peer</p>
+</header>
 
-<div id="controls">
-  <button onclick="addPeer()">➕ Aggiungi Peer</button>
-  <button onclick="removePeer()">➖ Rimuovi Peer</button>
-  <button onclick="resetSimulation()">🔄 Reset</button>
+<div class="container">
+
+    <!-- GRAFICO SOPRA -->
+    <div class="card">
+
+        <svg viewBox="0 0 800 500">
+
+            <!-- CONNECTIONS -->
+            <line class="link" x1="400" y1="80" x2="200" y2="250"/>
+            <line class="link" x1="400" y1="80" x2="600" y2="250"/>
+            <line class="link" x1="200" y1="250" x2="600" y2="250"/>
+            <line class="link" x1="200" y1="250" x2="120" y2="400"/>
+            <line class="link" x1="600" y1="250" x2="680" y2="400"/>
+            <line class="link" x1="400" y1="80" x2="400" y2="420"/>
+
+            <!-- TRACKER -->
+            <circle cx="400" cy="80" r="30" class="node tracker"/>
+            <text x="400" y="85" text-anchor="middle" fill="white">Tracker</text>
+
+            <!-- SEED -->
+            <circle cx="400" cy="420" r="30" class="node seed"/>
+            <text x="400" y="425" text-anchor="middle" fill="white">Seed</text>
+
+            <!-- PEERS -->
+            <circle cx="200" cy="250" r="25" class="node"/>
+            <text x="200" y="255" text-anchor="middle" fill="white">Peer</text>
+
+            <circle cx="600" cy="250" r="25" class="node"/>
+            <text x="600" y="255" text-anchor="middle" fill="white">Peer</text>
+
+            <circle cx="120" cy="400" r="22" class="node"/>
+            <text x="120" y="405" text-anchor="middle" fill="white">Peer</text>
+
+            <circle cx="680" cy="400" r="22" class="node"/>
+            <text x="680" y="405" text-anchor="middle" fill="white">Peer</text>
+
+        </svg>
+
+    </div>
+
+
+    <!-- SPIEGAZIONE SOTTO -->
+    <div class="card explanation">
+
+        <h2>Come funziona BitTorrent</h2>
+
+        <p>
+        Inserisci qui lo spiegone originale della tua pagina.
+        Puoi mantenere il testo identico oppure migliorarlo.
+        </p>
+
+        <p>
+        L’idea principale è che i file vengono suddivisi in piccoli pezzi e distribuiti tra più utenti,
+        riducendo il carico sul server centrale e aumentando la velocità complessiva.
+        </p>
+
+    </div>
+
 </div>
-
-<div style="max-width:800px;margin:20px auto;text-align:left;font-size:15px;">
-  <h3>Come interpretare la simulazione</h3>
-
-  <ul>
-    <li>
-      <strong>Percentuale (%) dentro ogni peer</strong><br>
-      Indica quanta parte del file è stata scaricata da quel computer.<br>
-      <em>Esempio:</em> 50% significa che il peer possiede metà dei pezzi del file.
-    </li>
-
-    <li>
-      <strong>Peer</strong><br>
-      Ogni cerchio rappresenta un computer collegato alla rete BitTorrent.
-      Un peer può <strong>scaricare e caricare</strong> contemporaneamente.
-    </li>
-
-    <li>
-      <strong>Seed (cerchio verde)</strong><br>
-      È un peer che possiede il <strong>100% del file</strong>.
-      Serve per diffondere inizialmente tutti i pezzi.
-    </li>
-
-    <li>
-      <strong>Leecher (cerchio giallo)</strong><br>
-      È un peer che non ha ancora il file completo,
-      ma <strong>condivide comunque</strong> i pezzi già scaricati.
-    </li>
-
-    <li>
-      <strong>Chunk (pezzo di file)</strong><br>
-      Il file viene diviso in piccoli pezzi.
-      Ogni peer scarica chunk diversi da peer diversi.
-    </li>
-
-    <li>
-      <strong>Linee blu tra i peer</strong><br>
-      Rappresentano lo <strong>scambio di chunk</strong> tra due computer.
-    </li>
-
-    <li>
-      <strong>Swarm</strong><br>
-      È l’insieme di tutti i peer che stanno condividendo lo stesso file.
-    </li>
-
-    <li>
-      <strong>Perché il download accelera?</strong><br>
-      Più peer entrano nello swarm, più fonti di download sono disponibili.
-    </li>
-
-    <li>
-      <strong>Perché BitTorrent è affidabile?</strong><br>
-      Se un peer si disconnette, gli altri continuano lo scambio senza problemi.
-    </li>
-  </ul>
-</div>
-
-  
-<script>
-/* -----------------------------
-   PARAMETRI DIDATTICI
------------------------------- */
-const TOTAL_CHUNKS = 6;
-let peers = [];
-
-/* -----------------------------
-   CLASSE PEER
------------------------------- */
-class Peer {
-  constructor(x, y, chunks = []) {
-    this.x = x;
-    this.y = y;
-    this.chunks = chunks;
-    this.radius = 30;
-  }
-
-  isSeed() {
-    return this.chunks.length === TOTAL_CHUNKS;
-  }
-
-  draw() {
-    // Colore peer
-    if (this.isSeed()) fill(0, 200, 0);
-    else fill(200, 200, 0);
-
-    ellipse(this.x, this.y, this.radius * 2);
-
-    // Testo percentuale
-    fill(0);
-    textSize(12);
-    textAlign(CENTER, CENTER);
-    text(
-      Math.floor((this.chunks.length / TOTAL_CHUNKS) * 100) + "%",
-      this.x,
-      this.y
-    );
-  }
-
-  sendChunk(other) {
-    let available = this.chunks.filter(
-      c => !other.chunks.includes(c)
-    );
-    if (available.length > 0) {
-      let chunk = random(available);
-      other.chunks.push(chunk);
-
-      // Linea animata
-      stroke(0, 150, 255);
-      line(this.x, this.y, other.x, other.y);
-    }
-  }
-}
-
-/* -----------------------------
-   SETUP
------------------------------- */
-function setup() {
-  createCanvas(800, 500);
-  resetSimulation();
-}
-
-/* -----------------------------
-   LOOP
------------------------------- */
-function draw() {
-  background(20);
-
-  // Titolo
-  noStroke();
-  fill(255);
-  textSize(16);
-  textAlign(CENTER);
-  text("Swarm BitTorrent", width / 2, 25);
-
-  // Disegna peer
-  for (let p of peers) {
-    p.draw();
-  }
-
-  // Scambio chunk
-  for (let i = 0; i < peers.length; i++) {
-    for (let j = 0; j < peers.length; j++) {
-      if (i !== j && random() < 0.01) {
-        peers[i].sendChunk(peers[j]);
-      }
-    }
-  }
-}
-
-/* -----------------------------
-   FUNZIONI INTERATTIVE
------------------------------- */
-function addPeer() {
-  let angle = random(TWO_PI);
-  let r = 180;
-  let x = width / 2 + cos(angle) * r;
-  let y = height / 2 + sin(angle) * r;
-
-  peers.push(new Peer(x, y, []));
-}
-
-function removePeer() {
-  if (peers.length > 1) peers.pop();
-}
-
-function resetSimulation() {
-  peers = [];
-
-  // Seed iniziale (file completo)
-  let seed = new Peer(width / 2, height / 2, []);
-  for (let i = 0; i < TOTAL_CHUNKS; i++) {
-    seed.chunks.push(i);
-  }
-  peers.push(seed);
-
-  // Leecher iniziali
-  for (let i = 0; i < 4; i++) {
-    addPeer();
-  }
-}
-</script>
 
 </body>
 </html>
